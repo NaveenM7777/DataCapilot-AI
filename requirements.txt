@@ -1,0 +1,12 @@
+streamlit
+streamlit-option-menu
+groq
+python-dotenv
+pandas
+sqlalchemy
+openpyxl
+pypdf
+langchain
+langchain-core
+langchain-groq
+langgraph
