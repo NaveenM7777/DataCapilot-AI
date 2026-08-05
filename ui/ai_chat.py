@@ -3,10 +3,6 @@ import streamlit as st
 from ai_agent.orchestrator import run_agent
 
 
-if "ai_chat_history" not in st.session_state:
-    st.session_state.ai_chat_history = []
-
-
 TOOL_LABELS = {
     "query_database": "Database",
     "query_spreadsheet": "Spreadsheet",
@@ -15,6 +11,9 @@ TOOL_LABELS = {
 
 
 def show_ai_chat():
+
+    if "ai_chat_history" not in st.session_state:
+        st.session_state.ai_chat_history = []
 
     st.title("AI Agent")
 

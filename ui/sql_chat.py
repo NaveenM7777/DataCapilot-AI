@@ -6,11 +6,10 @@ from sql_agent.sql_executor import execute_sql
 from llm.groq_client import explain_sql
 
 
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-
 def show_sql_chat():
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
 
     st.title("DataCapilot AI")
 
