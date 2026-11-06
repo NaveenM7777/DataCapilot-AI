@@ -1,5 +1,10 @@
 venv/
+.venv/
+.env
 __pycache__/
 *.pyc
-.env
+.pytest_cache/
 .streamlit/
+reports/
+company_data.xlsx
+company_doc.pdf

@@ -1,4 +1,33 @@
+import re
+
 from database.db_connection import run_query
+
+
+BLOCKED_COMMANDS = [
+    "INSERT",
+    "UPDATE",
+    "DELETE",
+    "DROP",
+    "ALTER",
+    "CREATE",
+    "TRUNCATE",
+    "REPLACE",
+    "GRANT",
+    "REVOKE",
+    "ATTACH",
+    "DETACH",
+    "PRAGMA",
+]
+
+
+def _remove_string_literals(sql):
+    """
+    Replaces 'quoted text' with an empty string so that words inside
+    quotes (for example the genre 'Alternative') are not mistaken
+    for SQL commands.
+    """
+
+    return re.sub(r"'(?:[^']|'')*'", "''", sql)
 
 
 def validate_sql(sql_query):
@@ -7,31 +36,22 @@ def validate_sql(sql_query):
     Blocks dangerous SQL commands.
     """
 
-    sql = sql_query.strip().upper()
-
-    blocked_commands = [
-        "INSERT",
-        "UPDATE",
-        "DELETE",
-        "DROP",
-        "ALTER",
-        "CREATE",
-        "TRUNCATE",
-        "REPLACE",
-        "GRANT",
-        "REVOKE",
-        "ATTACH",
-        "DETACH",
-        "PRAGMA"
-    ]
+    sql = sql_query.strip()
 
     # Allow only SELECT queries
-    if not sql.startswith("SELECT"):
+    if not sql.upper().startswith("SELECT"):
         return False, "❌ Only SELECT queries are allowed."
 
-    # Block dangerous commands
-    for command in blocked_commands:
-        if command in sql:
+    # Look only at the SQL itself, not at text inside quotes
+    checkable = _remove_string_literals(sql).upper()
+
+    # Block more than one statement
+    if ";" in checkable.rstrip().rstrip(";"):
+        return False, "❌ Multiple statements are not allowed."
+
+    # Block dangerous commands (whole words only)
+    for command in BLOCKED_COMMANDS:
+        if re.search(rf"\b{command}\b", checkable):
             return False, f"❌ '{command}' queries are not allowed."
 
     return True, None
