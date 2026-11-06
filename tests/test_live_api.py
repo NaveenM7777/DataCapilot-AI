@@ -3,10 +3,20 @@ import pytest
 
 BASE_URL = "http://127.0.0.1:8000"
 
+# (url, a question that agent can really answer)
+REAL_QUESTIONS = [
+    ("/sql/query", "How many customers are there?"),
+    ("/excel/query", "What is the total revenue?"),
+    ("/pdf/query", "What is the return window for physical media?"),
+    ("/agent/query", "How many customers are there?"),
+]
+URLS = [item[0] for item in REAL_QUESTIONS]
+IDS = ["sql", "excel", "pdf", "agent"]
+
 
 @pytest.fixture(scope="module")
 def live():
-    client = httpx.Client(base_url=BASE_URL, timeout=30)
+    client = httpx.Client(base_url=BASE_URL, timeout=120)
     try:
         client.get("/health")
     except httpx.ConnectError:
@@ -15,55 +25,20 @@ def live():
 
 
 def test_live_health(live):
-    r = live.get("/health")
-    assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    response = live.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
 
-def test_live_sql_valid(live):
-    r = live.post("/sql/query", json={"question": "How many customers?"})
-    assert r.status_code == 200
-    assert {"question", "sql", "answer"} <= set(r.json())
+@pytest.mark.parametrize("url", URLS, ids=IDS)
+def test_live_rejects_empty_question(live, url):
+    response = live.post(url, json={"question": ""})
+    assert response.status_code == 422
 
 
-def test_live_sql_empty_question(live):
-    r = live.post("/sql/query", json={"question": ""})
-    assert r.status_code == 422
-
-
-def test_live_excel_valid(live):
-    r = live.post(
-        "/excel/analyze",
-        files={"file": ("sales.csv", b"a,b\n1,2", "text/csv")},
-        data={"question": "What is the total?"},
-    )
-    assert r.status_code == 200
-    assert "answer" in r.json()
-
-
-def test_live_excel_wrong_type(live):
-    r = live.post(
-        "/excel/analyze",
-        files={"file": ("notes.txt", b"hello", "text/plain")},
-        data={"question": "anything"},
-    )
-    assert r.status_code == 400
-
-
-def test_live_pdf_valid(live):
-    r = live.post(
-        "/pdf/ask",
-        files={"file": ("policy.pdf", b"%PDF-1.4 fake", "application/pdf")},
-        data={"question": "What is the refund window?"},
-    )
-    assert r.status_code == 200
-    assert "answer" in r.json()
-
-
-def test_live_pdf_wrong_type(live):
-    r = live.post(
-        "/pdf/ask",
-        files={"file": ("sheet.xlsx", b"data", "application/octet-stream")},
-        data={"question": "anything"},
-    )
-    assert r.status_code == 400
+@pytest.mark.llm
+@pytest.mark.parametrize("url,question", REAL_QUESTIONS, ids=IDS)
+def test_live_returns_real_answer(live, url, question):
+    response = live.post(url, json={"question": question})
+    assert response.status_code == 200, response.text
+    assert response.json()["answer"].strip() != ""

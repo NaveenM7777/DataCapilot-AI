@@ -1,0 +1,11 @@
+[
+  {"id": "sql-customers-total", "question": "How many customers are there?", "expected": "59"},
+  {"id": "sql-customers-brazil", "question": "How many customers are from Brazil?", "expected": "5"},
+  {"id": "sql-customers-usa", "question": "How many customers are from USA?", "expected": "13"},
+  {"id": "sql-artists-total", "question": "How many artists are there?", "expected": "275"},
+  {"id": "sql-albums-total", "question": "How many albums are there?", "expected": "347"},
+  {"id": "sql-employees-total", "question": "How many employees are there?", "expected": "8"},
+  {"id": "sql-invoices-total", "question": "How many invoices are there?", "expected": "412"},
+  {"id": "sql-albums-acdc", "question": "How many albums does the artist AC/DC have?", "expected": "2"},
+  {"id": "sql-tracks-alternative", "question": "How many tracks have the genre named exactly 'Alternative'?", "expected": "40"}
+]

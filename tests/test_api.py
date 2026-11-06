@@ -1,4 +1,31 @@
-# ---------- Health ----------
+import pytest
+
+# (url, function to replace with a fake, fake agent result)
+CASES = [
+    (
+        "/sql/query",
+        "api.main.ask_sql_agent",
+        {"sql": "SELECT COUNT(*) FROM Customer", "answer": "59"},
+    ),
+    (
+        "/excel/query",
+        "api.main.ask_excel_agent",
+        {"code": "result = 272500", "answer": "272500"},
+    ),
+    (
+        "/pdf/query",
+        "api.main.ask_pdf_agent",
+        {"answer": "30 days (Page 3)", "pages": [3]},
+    ),
+    (
+        "/agent/query",
+        "api.main.ask_ai_agent",
+        {"answer": "There are 59 customers.", "tools_used": ["query_database"]},
+    ),
+]
+URLS = [case[0] for case in CASES]
+IDS = ["sql", "excel", "pdf", "agent"]
+
 
 def test_health_returns_ok(client):
     response = client.get("/health")
@@ -6,103 +33,48 @@ def test_health_returns_ok(client):
     assert response.json() == {"status": "ok"}
 
 
-# ---------- SQL ----------
+@pytest.mark.parametrize("url,target,fake_result", CASES, ids=IDS)
+def test_endpoint_returns_agent_answer(client, monkeypatch, url, target, fake_result):
+    monkeypatch.setattr(target, lambda question: fake_result)
 
-def test_sql_query_returns_answer(client, monkeypatch):
-    def fake_agent(question):
-        return {
-            "sql": "SELECT COUNT(*) FROM customers;",
-            "answer": "There are 42 customers.",
-        }
-
-    monkeypatch.setattr("api.main.ask_sql_agent", fake_agent)
-
-    response = client.post("/sql/query", json={"question": "How many customers?"})
+    response = client.post(url, json={"question": "test question"})
 
     assert response.status_code == 200
-    assert response.json() == {
-        "question": "How many customers?",
-        "sql": "SELECT COUNT(*) FROM customers;",
-        "answer": "There are 42 customers.",
-    }
+    assert response.json() == {"question": "test question", **fake_result}
 
 
-def test_sql_query_rejects_empty_question(client):
-    response = client.post("/sql/query", json={"question": ""})
+@pytest.mark.parametrize("url", URLS, ids=IDS)
+def test_endpoint_rejects_empty_question(client, url):
+    response = client.post(url, json={"question": ""})
     assert response.status_code == 422
 
 
-def test_sql_query_rejects_missing_question(client):
-    response = client.post("/sql/query", json={})
+@pytest.mark.parametrize("url", URLS, ids=IDS)
+def test_endpoint_rejects_whitespace_question(client, url):
+    response = client.post(url, json={"question": "     "})
     assert response.status_code == 422
 
 
-def test_sql_query_handles_agent_failure(client, monkeypatch):
+@pytest.mark.parametrize("url", URLS, ids=IDS)
+def test_endpoint_rejects_missing_question(client, url):
+    response = client.post(url, json={})
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("url", URLS, ids=IDS)
+def test_endpoint_rejects_too_long_question(client, url):
+    response = client.post(url, json={"question": "a" * 1001})
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("url,target,fake_result", CASES, ids=IDS)
+def test_endpoint_handles_agent_failure(client, monkeypatch, url, target, fake_result):
     def broken_agent(question):
-        raise RuntimeError("database offline")
+        raise RuntimeError("boom")
 
-    monkeypatch.setattr("api.main.ask_sql_agent", broken_agent)
+    monkeypatch.setattr(target, broken_agent)
 
-    response = client.post("/sql/query", json={"question": "hello"})
+    response = client.post(url, json={"question": "hello"})
 
     assert response.status_code == 500
-    assert "database offline" in response.json()["detail"]
-
-
-# ---------- Excel ----------
-
-def test_excel_analyze_returns_answer(client, monkeypatch):
-    monkeypatch.setattr(
-        "api.main.ask_excel_agent",
-        lambda content, filename, question: {"answer": "Total is 3."},
-    )
-    response = client.post(
-        "/excel/analyze",
-        files={"file": ("sales.csv", b"a,b\n1,2", "text/csv")},
-        data={"question": "What is the total?"},
-    )
-    assert response.status_code == 200
-    assert response.json() == {
-        "filename": "sales.csv",
-        "question": "What is the total?",
-        "answer": "Total is 3.",
-    }
-
-
-def test_excel_analyze_rejects_wrong_file_type(client):
-    response = client.post(
-        "/excel/analyze",
-        files={"file": ("notes.txt", b"hello", "text/plain")},
-        data={"question": "anything"},
-    )
-    assert response.status_code == 400
-
-
-def test_excel_analyze_requires_file(client):
-    response = client.post("/excel/analyze", data={"question": "anything"})
-    assert response.status_code == 422
-
-
-# ---------- PDF ----------
-
-def test_pdf_ask_returns_answer(client, monkeypatch):
-    monkeypatch.setattr(
-        "api.main.ask_pdf_agent",
-        lambda content, filename, question: {"answer": "The refund window is 30 days."},
-    )
-    response = client.post(
-        "/pdf/ask",
-        files={"file": ("policy.pdf", b"%PDF-1.4 fake", "application/pdf")},
-        data={"question": "What is the refund window?"},
-    )
-    assert response.status_code == 200
-    assert response.json()["answer"] == "The refund window is 30 days."
-
-
-def test_pdf_ask_rejects_wrong_file_type(client):
-    response = client.post(
-        "/pdf/ask",
-        files={"file": ("sheet.xlsx", b"data", "application/octet-stream")},
-        data={"question": "anything"},
-    )
-    assert response.status_code == 400
+    assert "boom" in response.json()["detail"]
