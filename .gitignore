@@ -8,3 +8,8 @@ __pycache__/
 reports/
 company_data.xlsx
 company_doc.pdf
+venv-eval/
+requirements-backup.txt
+
+.deepeval/
+.deepeval_telemetry.txt
