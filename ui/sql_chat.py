@@ -29,7 +29,7 @@ def show_sql_chat():
         st.metric(label="Tables", value=11)
 
     with col4:
-        st.metric(label="Model", value="Llama 3.3")
+        st.metric(label="Model", value="GPT-OSS 120B")
 
     st.markdown("---")
 

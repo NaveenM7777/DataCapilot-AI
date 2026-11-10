@@ -5,6 +5,67 @@ import numpy as np
 
 BLOCKED_PATTERNS = [".plot(", ".hist(", "matplotlib", "pyplot", ".show("]
 
+# --- Safety rules for AI-written code ---------------------------------------
+# The AI writes pandas code and we run it with exec(). Restricting __builtins__
+# is not enough, because `pd` and `np` give the code a way out (for example
+# pd.__builtins__ reaches the os module, and pd.read_csv can read any file).
+# So the code is checked BEFORE it runs.
+
+DENIED_NAMES = {
+    "eval", "exec", "compile", "open", "getattr", "setattr", "delattr",
+    "globals", "locals", "vars", "input", "breakpoint", "exit", "quit",
+    "os", "sys", "subprocess", "importlib", "builtins",
+}
+
+DENIED_ATTRIBUTES = {
+    "eval", "exec", "compile", "open", "system", "popen",
+    # numpy file access
+    "load", "loads", "loadtxt", "genfromtxt", "fromfile", "tofile", "save",
+    "savetxt", "savez", "savez_compressed", "memmap",
+    # pandas file writing
+    "to_csv", "to_excel", "to_json", "to_pickle", "to_sql", "to_parquet",
+    "to_feather", "to_hdf", "to_xml", "to_clipboard", "to_latex", "to_html",
+    "to_markdown", "to_stata", "to_orc",
+}
+
+
+def find_unsafe_code(code):
+    """
+    Returns a short reason if the code does something we do not allow,
+    or None if it looks safe. (This lowers the risk but is not a full sandbox.
+    A real sandbox runs the code in a separate, locked-down process.)
+    """
+
+    tree = ast.parse(code)
+
+    for node in ast.walk(tree):
+
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            return "import statements are not allowed"
+
+        if isinstance(node, ast.Attribute):
+            if node.attr.startswith("_"):
+                return f"access to '{node.attr}' is not allowed"
+            if node.attr in DENIED_ATTRIBUTES or node.attr.startswith("read_"):
+                return f"'{node.attr}' is not allowed (file access)"
+
+        if isinstance(node, ast.Name):
+            if node.id.startswith("__") or node.id in DENIED_NAMES:
+                return f"'{node.id}' is not allowed"
+
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if "__" in node.value:
+                return "text containing '__' is not allowed"
+
+    return None
+
+
+def _blocked_message(reason):
+    return (
+        f"🔒 The generated code was blocked for safety: {reason}.\n\n"
+        "Try rephrasing your question to ask for a calculation on the data."
+    )
+
 
 def execute_pandas_code(code, df):
     """
@@ -28,6 +89,11 @@ def execute_pandas_code(code, df):
             f"Raw generated code was:\n{code}\n\n"
             "Try rephrasing your question."
         )
+
+    unsafe_reason = find_unsafe_code(code)
+
+    if unsafe_reason:
+        return None, _blocked_message(unsafe_reason)
 
     safe_globals = {
         "__builtins__": {
@@ -88,6 +154,11 @@ def execute_pandas_code_multi(code, sheets, sheet_var_names):
             f"Raw generated code was:\n{code}\n\n"
             "Try rephrasing your question."
         )
+
+    unsafe_reason = find_unsafe_code(code)
+
+    if unsafe_reason:
+        return None, _blocked_message(unsafe_reason)
 
     safe_globals = {
         "__builtins__": {

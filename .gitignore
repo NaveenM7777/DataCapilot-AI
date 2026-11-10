@@ -1,5 +1,13 @@
 venv/
+.venv/
+.env
 __pycache__/
 *.pyc
-.env
+.pytest_cache/
 .streamlit/
+reports/
+venv-eval/
+requirements-backup.txt
+
+.deepeval/
+.deepeval_telemetry.txt

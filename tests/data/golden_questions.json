@@ -1,0 +1,32 @@
+[
+  {"id": "sql-customers-total", "agent": "sql", "question": "How many customers are there?", "expected": "59"},
+  {"id": "sql-customers-brazil", "agent": "sql", "question": "How many customers are from Brazil?", "expected": "5"},
+  {"id": "sql-customers-usa", "agent": "sql", "question": "How many customers are from USA?", "expected": "13"},
+  {"id": "sql-artists-total", "agent": "sql", "question": "How many artists are there?", "expected": "275"},
+  {"id": "sql-albums-total", "agent": "sql", "question": "How many albums are there?", "expected": "347"},
+  {"id": "sql-employees-total", "agent": "sql", "question": "How many employees are there?", "expected": "8"},
+  {"id": "sql-invoices-total", "agent": "sql", "question": "How many invoices are there?", "expected": "412"},
+  {"id": "sql-albums-acdc", "agent": "sql", "question": "How many albums does the artist AC/DC have?", "expected": "2"},
+  {"id": "sql-tracks-alternative", "agent": "sql", "question": "How many tracks have the genre named exactly 'Alternative'?", "expected": "40"},
+
+  {"id": "excel-revenue-total", "agent": "excel", "question": "What is the total revenue for the year?", "expected": "272500"},
+  {"id": "excel-revenue-december", "agent": "excel", "question": "What was the revenue in December?", "expected": "31200"},
+  {"id": "excel-new-customers-total", "agent": "excel", "question": "What is the total number of new customers for the year?", "expected": "732"},
+  {"id": "excel-best-month", "agent": "excel", "question": "Which month had the highest revenue?", "expected": "Dec"},
+  {"id": "excel-highest-rent-store", "agent": "excel", "question": "Which store city has the highest monthly rent?", "expected": "New York"},
+  {"id": "excel-canada-stores", "agent": "excel", "question": "How many stores are in Canada?", "expected": "2"},
+  {"id": "excel-usa-rent-total", "agent": "excel", "question": "What is the total monthly rent of the stores in the USA?", "expected": "16900"},
+  {"id": "excel-sales-dept-q1", "agent": "excel", "question": "What is the total Sales_Q1 of the Sales department?", "expected": "84400"},
+
+  {"id": "pdf-return-window", "agent": "pdf", "question": "What is the return window for physical media?", "expected": "30"},
+  {"id": "pdf-sixth-store", "agent": "pdf", "question": "Where is the planned sixth store location?", "expected": "Seattle"},
+  {"id": "pdf-annual-revenue", "agent": "pdf", "question": "What is the total annual revenue reported?", "expected": "272500"},
+  {"id": "pdf-oldest-store", "agent": "pdf", "question": "Which store is the oldest?", "expected": "New York"},
+  {"id": "pdf-refund-days", "agent": "pdf", "question": "How many business days does it take to process refunds?", "expected": "7"},
+  {"id": "pdf-margaret-department", "agent": "pdf", "question": "Which department is Margaret Park in?", "expected": "Support"},
+
+  {"id": "orchestrator-routes-to-database", "agent": "orchestrator", "question": "How many customers are there in the database?", "expected": "59", "expected_tools": ["query_database"]},
+  {"id": "orchestrator-routes-to-spreadsheet", "agent": "orchestrator", "question": "According to the spreadsheet, what was the revenue in December?", "expected": "31200", "expected_tools": ["query_spreadsheet"]},
+  {"id": "orchestrator-routes-to-pdf", "agent": "orchestrator", "question": "According to the PDF report, what is the return window for physical media?", "expected": "30", "expected_tools": ["query_pdf"]},
+  {"id": "orchestrator-uses-two-tools", "agent": "orchestrator", "question": "How many customers are in the database, and what was the December revenue in the spreadsheet?", "expected": ["59", "31200"], "expected_tools": ["query_database", "query_spreadsheet"]}
+]

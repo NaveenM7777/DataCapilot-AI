@@ -117,7 +117,7 @@ with st.sidebar:
 
     st.markdown("### AI Model")
 
-    st.info("Llama 3.3 70B (Groq)")
+    st.info("GPT-OSS 120B (Groq)")
 
 
 if selected == "SQL Assistant":
