@@ -6,8 +6,6 @@ __pycache__/
 .pytest_cache/
 .streamlit/
 reports/
-company_data.xlsx
-company_doc.pdf
 venv-eval/
 requirements-backup.txt
 

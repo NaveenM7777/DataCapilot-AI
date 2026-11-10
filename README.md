@@ -214,6 +214,27 @@ This app is deployed on [Streamlit Community Cloud](https://share.streamlit.io):
 
 ---
 
+## Quality Engineering
+
+![tests](https://github.com/NaveenM7777/DataCapilot-AI/actions/workflows/tests.yml/badge.svg?branch=main)
+
+This project is also a quality-engineering case study. An automated suite checks the app at every level and runs on every push with GitHub Actions, with no secrets and no real AI calls.
+
+| Level | What is checked |
+|---|---|
+| API | A FastAPI layer (`api/`) wraps the four agents: input validation, error handling, odd input, concurrent requests |
+| AI answers | 28 golden questions with known answers, including checks that the orchestrator picks the right tool |
+| Answer quality | DeepEval faithfulness and relevancy scores for the PDF agent, with a Groq model as the judge |
+| Safety | SQL attacks, AI-written-code sandbox escapes, prompt injection, key leaks, personal data |
+| UI | Streamlit AppTest and Playwright browser tests, with fake AI answers so they are free and repeatable |
+| Performance | Latency report and concurrent-request tests |
+
+Bugs the tests found, now fixed: the SQL safety check blocked harmless queries (the genre "Alternative" contains the letters ALTER); AI-written pandas code could escape its sandbox and read or write files; customer contact details could be queried freely; the UI named the wrong AI model.
+
+Run the free tests with `pytest -v`. Full guide: [docs/TESTING.md](docs/TESTING.md). One-page summary: [docs/PROJECT_SUMMARY.md](docs/PROJECT_SUMMARY.md).
+
+New folders: `api/` (FastAPI layer), `tests/` (all tests, `tests/ui/` for the UI), `evals/` (DeepEval judge), `docs/`, `.github/workflows/` (CI).
+
 ## Known Limitations
 
 - The PDF retriever uses keyword matching rather than semantic embeddings — works well for short, clearly-worded documents like the sample report, but would need an embeddings-based retriever for longer or more ambiguous documents.

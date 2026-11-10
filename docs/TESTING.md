@@ -11,7 +11,7 @@ An automated test suite around the SQL, Excel, PDF and AI-orchestrator agents an
 | SQL safety and personal data | `tests/test_sql_validator.py`, `tests/test_safety_sql.py` | No | Everywhere, CI |
 | Code-execution safety | `tests/test_safety_excel_sandbox.py` | No | Everywhere, CI |
 | Answer matching | `tests/test_answer_matching.py` | No | Everywhere, CI |
-| Data consistency | `tests/test_data_consistency.py` | No | Needs the company files |
+| Data consistency | `tests/test_data_consistency.py` | No | Everywhere, CI (the company files are in the repository) |
 | API performance | `tests/test_performance.py` | Mostly no | Everywhere, CI |
 | UI screens (no browser) | `tests/ui/test_ui_apptest.py` | No (fake AI) | Everywhere, CI |
 | UI in a real browser | `tests/ui/test_ui_browser.py` | No (fake AI) | Needs Playwright, CI browser job |
@@ -46,7 +46,7 @@ pytest -m llm tests/test_llm_deepeval.py -v -rs  # in venv-eval; scores in repor
 uvicorn api.main:app                             # then: pytest tests/test_live_api.py -v
 ```
 
-Expected totals for `pytest -v`: 131 passed, 6 skipped, 45 deselected, 1 xfailed (Playwright installed). GitHub CI main job: 123 passed, 11 skipped, 45 deselected. GitHub CI browser job: 5 passed.
+Expected totals for `pytest -v`: 131 passed, 6 skipped, 45 deselected, 1 xfailed (Playwright installed). GitHub CI main job: 126 passed, 7 skipped, 45 deselected, 1 xfailed. GitHub CI browser job: 5 passed.
 
 ## How the UI tests avoid the real AI
 
