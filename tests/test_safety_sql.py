@@ -54,14 +54,39 @@ def test_load_extension_cannot_run():
     assert "not authorized" in error
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "KNOWN GAP: customer emails and phone numbers can be queried freely. "
-        "There is no column-level protection for personal data."
-    ),
-)
-def test_personal_data_columns_are_protected():
-    result, error = execute_sql("SELECT Email, Phone FROM Customer LIMIT 3")
+PERSONAL_DATA_QUERIES = {
+    "email-column": "SELECT Email FROM Customer",
+    "email-and-phone": "SELECT Email, Phone FROM Customer LIMIT 3",
+    "lowercase": "select email from customer",
+    "employee-fax": "SELECT Fax FROM Employee",
+    "address": "SELECT Address FROM Customer",
+    "select-star": "SELECT * FROM Customer",
+    "alias-star": "SELECT c.* FROM Customer c",
+    "billing-address": "SELECT BillingAddress FROM Invoice",
+}
+
+
+@pytest.mark.parametrize("sql", PERSONAL_DATA_QUERIES.values(), ids=PERSONAL_DATA_QUERIES.keys())
+def test_personal_data_is_blocked(sql):
+    result, error = execute_sql(sql)
 
     assert result is None, "personal data was returned without restriction"
+    assert "personal data" in error.lower()
+
+
+# The protection must not break normal questions.
+NORMAL_QUERIES = {
+    "count-star": "SELECT COUNT(*) FROM Customer",
+    "group-by-country": "SELECT Country, COUNT(*) AS customers FROM Customer GROUP BY Country",
+    "multiplication": "SELECT SUM(UnitPrice * Quantity) FROM InvoiceLine",
+    "select-star-from-track": "SELECT * FROM Track LIMIT 3",
+    "names-only": "SELECT FirstName, LastName FROM Customer LIMIT 3",
+}
+
+
+@pytest.mark.parametrize("sql", NORMAL_QUERIES.values(), ids=NORMAL_QUERIES.keys())
+def test_normal_queries_still_work(sql):
+    result, error = execute_sql(sql)
+
+    assert error is None, error
+    assert result is not None and not result.empty

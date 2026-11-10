@@ -71,21 +71,19 @@ def test_sidebar_shows_database_and_model_boxes(monkeypatch):
     assert len(app.sidebar.info) == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "KNOWN UI BUG: the sidebar says 'Llama 3.3 70B (Groq)' but every agent "
-        "calls openai/gpt-oss-120b"
-    ),
-)
-def test_sidebar_names_the_model_that_is_really_used(monkeypatch):
+def test_model_label_names_the_model_that_is_really_used(monkeypatch):
     code = (ROOT / "llm" / "groq_client.py").read_text(encoding="utf-8")
     real_model = re.search(r'model="([^"]+)"', code).group(1)  # e.g. openai/gpt-oss-120b
     short_name = real_model.split("/")[-1]
 
     app = open_app(monkeypatch)
 
-    assert short_name.lower() in app.sidebar.info[0].value.lower()
+    def squash(text):
+        # 'gpt-oss-120b' and 'GPT-OSS 120B' are the same model
+        return re.sub(r"[^a-z0-9]", "", text.lower())
+
+    assert squash(short_name) in squash(app.sidebar.info[0].value)
+    assert squash(short_name) in squash(" ".join(metric_value(app, "Model")))
 
 
 # --- SQL screen --------------------------------------------------------------
