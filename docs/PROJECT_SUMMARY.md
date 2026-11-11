@@ -20,7 +20,7 @@ AI applications are hard to test: the same question can produce differently word
 
 ## Results
 
-- About 130 automated tests run free and repeatably in CI (126 in the main job, 5 in the browser job).
+- About 130 automated tests run free and repeatably in CI (127 in the main job, 5 in the browser job).
 - About 50 more tests use the real AI on demand: 28 golden questions, 12 safety attacks, live-server and latency checks, plus 7 DeepEval quality checks.
 - Real-model runs: SQL golden questions 9 of 9, Excel 8 of 8, orchestrator 4 of 4 (including correct tool choice), AI-safety attacks 12 of 12.
 - PDF golden questions: 6 of 7 on the first run. The one failure was a test bug (the model wrote an invisible non-breaking space inside "New York"), fixed by normalizing text.

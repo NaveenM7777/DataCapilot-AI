@@ -72,8 +72,8 @@ def test_sidebar_shows_database_and_model_boxes(monkeypatch):
 
 
 def test_model_label_names_the_model_that_is_really_used(monkeypatch):
-    code = (ROOT / "llm" / "groq_client.py").read_text(encoding="utf-8")
-    real_model = re.search(r'model="([^"]+)"', code).group(1)  # e.g. openai/gpt-oss-120b
+    code = (ROOT / "llm" / "config.py").read_text(encoding="utf-8")
+    real_model = re.search(r'MODEL\s*=\s*"([^"]+)"', code).group(1)  # e.g. openai/gpt-oss-120b
     short_name = real_model.split("/")[-1]
 
     app = open_app(monkeypatch)

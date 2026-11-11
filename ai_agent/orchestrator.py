@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from llm.config import MODEL
 
 from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
@@ -14,7 +15,7 @@ load_dotenv()
 # proper tool call), which Groq's API rejects outright. gpt-oss-120b
 # is Groq's current recommendation for reliable tool/function calling.
 llm = ChatGroq(
-    model="openai/gpt-oss-120b",
+    model=MODEL,
     temperature=0,
     groq_api_key=os.getenv("GROQ_API_KEY"),
 )
