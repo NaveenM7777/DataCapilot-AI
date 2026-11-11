@@ -2,6 +2,7 @@ import os
 import re
 from groq import Groq
 from dotenv import load_dotenv
+from llm.config import MODEL
 
 load_dotenv()
 
@@ -70,7 +71,7 @@ def generate_pandas_code(question, df, chat_history=None):
     )
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -147,7 +148,7 @@ def generate_pandas_code_multi(question, sheets, chat_history=None):
     )
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -168,7 +169,7 @@ def explain_pandas_code(code):
     )
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": code}

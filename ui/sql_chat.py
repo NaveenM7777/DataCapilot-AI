@@ -4,6 +4,7 @@ import streamlit as st
 from sql_agent.sql_generator import generate_sql
 from sql_agent.sql_executor import execute_sql
 from llm.groq_client import explain_sql
+from llm.config import MODEL
 
 
 def show_sql_chat():
@@ -29,7 +30,7 @@ def show_sql_chat():
         st.metric(label="Tables", value=11)
 
     with col4:
-        st.metric(label="Model", value="GPT-OSS 120B")
+        st.metric(label="Model", value=MODEL.split("/")[-1])
 
     st.markdown("---")
 

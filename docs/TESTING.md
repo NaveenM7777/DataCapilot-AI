@@ -11,6 +11,7 @@ An automated test suite around the SQL, Excel, PDF and AI-orchestrator agents an
 | SQL safety and personal data | `tests/test_sql_validator.py`, `tests/test_safety_sql.py` | No | Everywhere, CI |
 | Code-execution safety | `tests/test_safety_excel_sandbox.py` | No | Everywhere, CI |
 | Answer matching | `tests/test_answer_matching.py` | No | Everywhere, CI |
+| Model name in one place | `tests/test_model_config.py` | No | Everywhere, CI |
 | Data consistency | `tests/test_data_consistency.py` | No | Everywhere, CI (the company files are in the repository) |
 | API performance | `tests/test_performance.py` | Mostly no | Everywhere, CI |
 | UI screens (no browser) | `tests/ui/test_ui_apptest.py` | No (fake AI) | Everywhere, CI |
@@ -46,7 +47,7 @@ pytest -m llm tests/test_llm_deepeval.py -v -rs  # in venv-eval; scores in repor
 uvicorn api.main:app                             # then: pytest tests/test_live_api.py -v
 ```
 
-Expected totals for `pytest -v`: 131 passed, 6 skipped, 45 deselected, 1 xfailed (Playwright installed). GitHub CI main job: 126 passed, 7 skipped, 45 deselected, 1 xfailed. GitHub CI browser job: 5 passed.
+Expected totals for `pytest -v`: 132 passed, 6 skipped, 45 deselected, 1 xfailed (Playwright installed). GitHub CI main job: 127 passed, 7 skipped, 45 deselected, 1 xfailed. GitHub CI browser job: 5 passed.
 
 ## How the UI tests avoid the real AI
 
@@ -64,7 +65,7 @@ Expected totals for `pytest -v`: 131 passed, 6 skipped, 45 deselected, 1 xfailed
 | 6 | Models write look-alike characters (non-breaking spaces and hyphens), which broke exact text matching | Fixed in the test helpers |
 | 7 | The AI judge is noisy: it once claimed the PDF names Toronto as the oldest store, then scored the same answer 1.0 | Mitigated: a failing score is confirmed with a second try, and the relevancy threshold (0.6) is documented |
 | 8 | The UI showed "Llama 3.3" while every agent uses gpt-oss-120b | Fixed, test now guards it |
-| 9 | The model name is hard-coded in 8 places across 5 files | Open (maintainability) |
+| 9 | The model name was hard-coded in 8 places across 5 files | Fixed: one constant in `llm/config.py`, and a test fails if a model name is typed into the code again |
 | 10 | The first screen of a fresh session takes more than 5 seconds to appear | Open (observation) |
 
 ## Known limitations

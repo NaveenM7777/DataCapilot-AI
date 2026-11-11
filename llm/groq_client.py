@@ -1,5 +1,6 @@
 from groq import Groq
 from dotenv import load_dotenv
+from llm.config import MODEL
 import os
 
 # Load environment variables
@@ -19,7 +20,7 @@ def ask_groq(prompt):
 
     response = client.chat.completions.create(
 
-        model="openai/gpt-oss-120b",
+        model=MODEL,
 
         messages=[
             {
@@ -59,7 +60,7 @@ SQL Query:
 
     response = client.chat.completions.create(
 
-        model="openai/gpt-oss-120b",
+        model=MODEL,
 
         messages=[
             {

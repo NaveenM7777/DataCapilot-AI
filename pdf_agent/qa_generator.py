@@ -1,6 +1,7 @@
 import os
 from groq import Groq
 from dotenv import load_dotenv
+from llm.config import MODEL
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ def generate_answer(question, relevant_chunks, chat_history=None):
     )
 
     response = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
+        model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}

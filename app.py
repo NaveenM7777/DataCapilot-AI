@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from llm.config import MODEL
 
 from ui.theme import apply_theme
 from ui.sql_chat import show_sql_chat
@@ -117,7 +118,7 @@ with st.sidebar:
 
     st.markdown("### AI Model")
 
-    st.info("GPT-OSS 120B (Groq)")
+    st.info(f"{MODEL.split('/')[-1]} (Groq)")
 
 
 if selected == "SQL Assistant":
